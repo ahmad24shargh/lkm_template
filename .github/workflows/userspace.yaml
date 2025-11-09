@@ -30,18 +30,19 @@ jobs:
           chmod +x sstrip
           mkdir binaries
 
-          ./zig/zig cc -target aarch64-linux -s -Oz userspace.c -static -Wl,--gc-sections -Wno-format -o binaries/reboot-small-aarch64
-          ./zig/zig cc -target arm-linux -s -Oz userspace.c -static -Wl,--gc-sections -Wno-format -o binaries/reboot-small-arm
-          ./zig/zig cc -target x86_64-linux -s -Oz userspace.c -static -Wl,--gc-sections -Wno-format -o binaries/reboot-small-x64
+          for file in $(find . -maxdepth 1 -type f -name '*.c');do
+            userspace="${file##*/}"
+            ./zig/zig cc -target aarch64-linux -s -Oz ${userspace} -static -Wl,--gc-sections -Wno-format -o binaries/${userspace%.*}-arm64
+          done
 
-          wc -c binaries/reboot-*
+          wc -c binaries/*
           
-          upx --ultra-brute binaries/reboot-*
+          upx --ultra-brute binaries/*
           
           for file in binaries/*; do ./sstrip $file ; done
           
-          wc -c binaries/reboot-*
-          file binaries/reboot-*
+          wc -c binaries/*
+          file binaries/*
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
